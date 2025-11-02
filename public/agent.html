@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Agent (AI) — LiveKit demo</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 20px
+        }
+
+        label {
+            display: block;
+            margin: 8px 0
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Agent (AI) — Browser TTS demo</h2>
+    <label>Agent identity: <input id="identity" value="agent_ai"></label>
+    <button id="join">Get Token (open LiveKit client yourself)</button>
+    <div>
+        <p><b>How this demo works</b>: this agent page uses the browser <code>SpeechSynthesis</code> to speak replies
+            locally. To publish the agent's audio into LiveKit you have two options:</p>
+        <ol>
+            <li>Use a server-side TTS (I can add if you give a TTS API key) — then the server can publish the audio
+                track into LiveKit automatically.</li>
+            <li>Use a virtual audio cable (or share system audio) so the browser's TTS is captured by your microphone
+                and published to LiveKit when you join with the agent identity.</li>
+        </ol>
+    </div>
+
+    <div>
+        <label>Text to speak: <input id="text" size="80"
+                value="Hello — I am the AI agent. If I don't know an answer I'll request a supervisor."></label>
+        <button id="speak">Speak (SpeechSynthesis)</button>
+    </div>
+
+    <script>
+        document.getElementById('speak').onclick = () => {
+            const txt = document.getElementById('text').value;
+            const u = new SpeechSynthesisUtterance(txt);
+            u.lang = 'en-US';
+            speechSynthesis.speak(u);
+        };
+
+        document.getElementById('join').onclick = async () => {
+            const identity = document.getElementById('identity').value || 'agent_ai';
+            const res = await fetch(`/api/token?identity=${encodeURIComponent(identity)}`);
+            const j = await res.json();
+            alert('Token retrieved. To publish the agent audio into LiveKit you must open a LiveKit client with this token, join the room and publish an audio track. Token details copied to console.');
+            console.log(j);
+        };
+    </script>
+</body>
+
+</html>

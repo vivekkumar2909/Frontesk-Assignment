@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Caller (LiveKit voice demo)</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 20px
+        }
+
+        label {
+            display: block;
+            margin: 8px 0
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Caller — join LiveKit room & publish mic</h2>
+    <label>Caller identity: <input id="identity" value="caller_1"></label>
+    <label>Question to ask: <input id="question" value="What are your opening hours?" size="60"></label>
+    <button id="joinBtn">Join & Publish Mic</button>
+    <button id="askBtn">Ask AI (POST /api/call)</button>
+
+    <pre id="out"></pre>
+
+    <script>
+        // Usage:
+        // 1) Click Join & Publish Mic -> opens LiveKit join flow in popup (or new tab) using /api/token
+        // 2) Then click Ask AI -> will POST to /api/call (AI will decide if answers or creates help request)
+        document.getElementById('joinBtn').onclick = async () => {
+            const identity = document.getElementById('identity').value;
+            const res = await fetch(`/api/token?identity=${encodeURIComponent(identity)}`);
+            const j = await res.json();
+            // open livekit quick join using the token as a simple page
+            // For demo, open LiveKit web sample url: you can copy-paste token into a LiveKit client page
+            // Simpler: show token info and instruct user to use LiveKit sample client to join.
+            document.getElementById('out').textContent = JSON.stringify(j, null, 2) + "\n\nUse a LiveKit web client (e.g. livekit-client quickstart) with this token to join the room and publish microphone audio.";
+        };
+
+        document.getElementById('askBtn').onclick = async () => {
+            const identity = document.getElementById('identity').value || 'caller_1';
+            const question = document.getElementById('question').value;
+            const body = { callerId: identity, name: identity, phone: 'web', question };
+            const r = await fetch('/api/call', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            const j = await r.json();
+            document.getElementById('out').textContent = 'AI respond: ' + JSON.stringify(j, null, 2);
+        };
+    </script>
+</body>
+
+</html>
